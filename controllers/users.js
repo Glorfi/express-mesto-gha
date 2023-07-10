@@ -19,7 +19,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'CastError') {
         res.status(400).send({ message: 'Неверный формат идентификатора пользователя' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -36,10 +36,9 @@ module.exports.createUser = (req, res) => {
           .status(400)
           .send({ message: 'Введены некоректные данные в теле запроса' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
-  //   .catch((err) => res.send({ message: err }));
 };
 
 module.exports.updateUserInfo = (req, res) => {
@@ -62,7 +61,7 @@ module.exports.updateUserInfo = (req, res) => {
           .status(400)
           .send({ message: 'Введены некоректные данные в теле запроса' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -87,7 +86,7 @@ module.exports.updateUserAvatar = (req, res) => {
           .status(400)
           .send({ message: 'Введены некоректные данные в теле запроса' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };

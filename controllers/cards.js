@@ -63,7 +63,7 @@ module.exports.likeCard = (req, res) => {
           .status(400)
           .send({ message: 'Неверный формат идентификатора карточки' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
@@ -87,7 +87,7 @@ module.exports.dislikeCard = (req, res) => {
           .status(400)
           .send({ message: 'Неверный формат идентификатора карточки' });
       } else {
-        res.status(500).send({ message: err.message });
+        res.status(500).send({ message: 'На сервере произошла ошибка' });
       }
     });
 };
