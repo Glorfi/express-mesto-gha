@@ -19,7 +19,16 @@ module.exports.createUser = (req, res) => {
     .then((user) => {
       res.send({ user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Введены некоректные данные в теле запроса' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
+  //   .catch((err) => res.send({ message: err }));
 };
 
 module.exports.updateUserInfo = (req, res) => {
@@ -31,12 +40,20 @@ module.exports.updateUserInfo = (req, res) => {
     {
       new: true,
       runValidators: true,
-    },
+    }
   )
     .then((user) => {
       res.send({ user });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Введены некоректные данные в теле запроса' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -48,10 +65,18 @@ module.exports.updateUserAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-    },
+    }
   )
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Введены некоректные данные в теле запроса' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
