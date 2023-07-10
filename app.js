@@ -20,4 +20,17 @@ app.use((req, res, next) => {
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
+app.use((req, res, next) => {
+  const err = new Error('NotFound');
+  err.status = 404;
+  next(err);
+});
+app.use((err, req, res, next) => {
+  if (err.status === 404) {
+    res.status(404).json({ message: 'Неверный путь' });
+  } else {
+    next(err);
+  }
+});
+
 app.listen(PORT);
