@@ -13,7 +13,15 @@ module.exports.createCard = (req, res) => {
     .then((card) => {
       res.send({ card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: 'Введены некоректные данные в теле запроса' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
