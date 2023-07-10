@@ -27,9 +27,21 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndDelete(req.params.id)
     .then((card) => {
-      res.send(card);
+      if (!card) {
+        res.status(404).send({ message: 'Карточка не найдена' });
+      } else {
+        res.send(card);
+      }
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        res
+          .status(400)
+          .send({ message: 'Неверный формат идентификатора карточки' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.likeCard = (req, res) => {
