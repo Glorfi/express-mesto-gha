@@ -1,4 +1,3 @@
-const user = require('../models/user');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -28,11 +27,11 @@ module.exports.updateUserInfo = (req, res) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(
     userId,
-    { name: name, about: about },
+    { name, about },
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => {
       res.send({ data: user });
@@ -45,11 +44,11 @@ module.exports.updateUserAvatar = (req, res) => {
   const userId = req.user._id;
   User.findByIdAndUpdate(
     userId,
-    { avatar: avatar },
+    { avatar },
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => {
       res.send(user);
