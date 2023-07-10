@@ -1,4 +1,4 @@
-const { PORT = 3000 } = process.env;
+const { PORT = 3000, BASE_URL = '127.0.0.1:27017' } = process.env;
 const express = require('express');
 const mongoose = require('mongoose');
 
@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
+mongoose.connect(`mongodb://${BASE_URL}/mestodb`);
 
 app.use((req, res, next) => {
   req.user = {
