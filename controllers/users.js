@@ -12,10 +12,12 @@ module.exports.getUser = (req, res) => {
     .then((user) => {
       if (!user) {
         res.status(404).send({ message: 'Пользователь не найден' });
-      } else { res.send(user); }
+      } else {
+        res.send(user);
+      }
     }).catch((err) => {
       if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Пользователь не найден' });
+        res.status(400).send({ message: 'Неверный формат идентификатора пользователя' });
       } else {
         res.status(500).send({ message: err.message });
       }
