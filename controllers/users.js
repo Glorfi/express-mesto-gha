@@ -10,12 +10,10 @@ module.exports.getUser = (req, res) => {
   const { id } = req.params;
   User.findById(id)
     .then((user) => {
-      if (!user) {
-        res.status(404).send({ message: 'Пользователя не существует' });
-      } else { res.send(user); }
+      res.send(user);
     }).catch((err) => {
       if (err.name === 'CastError') {
-        res.status(404).send({ message: 'Пользователь не найден' });
+        res.status(400).send({ message: 'Пользователь не найден' });
       } else {
         res.status(500).send({ message: err.message });
       }
