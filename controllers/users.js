@@ -8,9 +8,18 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   const { id } = req.params;
-  User.findById(id).then((user) => {
-    res.send(user);
-  });
+  User.findById(id)
+    .then((user) => {
+      if (!user) {
+        res.status(404).send({ message: 'Пользователя не существует' });
+      } else { res.send(user); }
+    }).catch((err) => {
+      if (err.name === 'CastError') {
+        res.status(404).send({ message: 'Пользователь не найден' });
+      } else {
+        res.status(500).send({ message: err.message });
+      }
+    });
 };
 
 module.exports.createUser = (req, res) => {
