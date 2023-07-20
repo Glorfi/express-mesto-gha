@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const isEmail = require('validator/lib/isEmail');
+const avatarRegex =
+  /^(http(s)?:\/\/)?(www\.)?[a-zA-Z0-9-._~:/?#\[\]@!$&'()*+,;=]+#?$/;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -21,6 +23,7 @@ const userSchema = new mongoose.Schema({
     required: false,
     default:
       'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    match: avatarRegex,
   },
   email: {
     type: String,
@@ -34,6 +37,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
+    select: false,
   },
 });
 

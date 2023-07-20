@@ -1,56 +1,68 @@
 const bcrypt = require('bcrypt');
-const User = require('../models/user');
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const { DuplicatedEmail, UserNotFound } = require('../utils/errorsConfig');
 
 module.exports.getUsers = (req, res) => {
   User.find({}).then((users) => {
     res.send(users);
   });
 };
-
-module.exports.getUser = (req, res) => {
-  const { id } = req.params;
-  User.findById(id)
+module.exports.getCurrentUser = (req, res, next) => {
+  const { _id } = req.user;
+  User.findById(_id)
+    // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: 'Пользователь не найден' });
-      } else {
-        res.send(user);
+        return Promise.reject(new UserNotFound('Пользователь не найден'));
       }
+      res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Неверный формат идентификатора пользователя' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+module.exports.getUser = (req, res, next) => {
+  const { id } = req.params;
+  User.findById(id)
+    // eslint-disable-next-line consistent-return
+    .then((user) => {
+      if (!user) {
+        return Promise.reject(new UserNotFound('Пользователь не найден'));
+      }
+      res.send(user);
+    })
+    .catch(next);
+};
+
+module.exports.createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return User.create({ name, about, avatar, email, password: hash });
-    })
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => {
       res.send({ user });
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Введены некоректные данные в теле запроса' });
+      if (err.code === 11000) {
+        const duplicateEmailError = new DuplicatedEmail(
+          'Пользователь с данным email уже существует',
+        );
+        next(duplicateEmailError);
       } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
+        next();
       }
     });
-}; // проверить чтобы сервер сообщал что пользователь с таким имейлом уже существует
+};
 
-module.exports.updateUserInfo = (req, res) => {
+module.exports.updateUserInfo = (req, res, next) => {
   const { name, about } = req.body;
   const userId = req.user._id;
   User.findByIdAndUpdate(
@@ -59,23 +71,15 @@ module.exports.updateUserInfo = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => {
-      res.send({ user });
+      res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Введены некоректные данные в теле запроса' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const { avatar } = req.body;
   const userId = req.user._id;
   User.findByIdAndUpdate(
@@ -84,43 +88,34 @@ module.exports.updateUserAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .then((user) => {
       res.send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Введены некоректные данные в теле запроса' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
 };
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
   User.findOne({ email })
+    .select('+password')
     .then((user) => {
       if (!user) {
         return Promise.reject(new Error('Неправильные почта или пароль'));
-      } else {
-        return bcrypt.compare(password, user.password).then((matched) => {
-          if (!matched) {
-            return Promise.reject(new Error('Неправильные почта или пароль'));
-          } else {
-            return user;
-          }
-        });
       }
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return Promise.reject(new Error('Неправильные почта или пароль'));
+        }
+        return user;
+      });
     })
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, 'super-strong-secret', {
         expiresIn: '7d',
       });
-      res.send({ token: token });
+      res.send({ token });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
