@@ -25,22 +25,25 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndDelete(req.params.id)
+  const userId = req.user._id;
+  Card.findById(req.params.id)
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
-      } else {
-        res.send(card);
+        return Promise.reject(new Error('Карточка не найдена'));
       }
+      if (card.owner.toString() !== userId.toString()) {
+        return Promise.reject(new Error('Нет прав на удаление карточки'));
+      }
+      return Card.findByIdAndDelete(req.params.id);
     })
+    .then((deletedCard) => res.send(deletedCard))
     .catch((err) => {
       if (err.name === 'CastError') {
-        res
+        return res
           .status(400)
           .send({ message: 'Неверный формат идентификатора карточки' });
-      } else {
-        res.status(500).send({ message: err.message });
       }
+      return res.status(500).send({ message: err.message });
     });
 };
 
