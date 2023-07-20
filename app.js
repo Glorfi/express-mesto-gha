@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useUnifiedTopology: true,
   useNewUrlParser: true,
-  autoIndex: true, // make this also true
+  autoIndex: true, // make this also tru
 });
 
 app.post('/signin', celebrate(credentialsConfig), login);
