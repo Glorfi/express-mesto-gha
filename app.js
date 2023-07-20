@@ -24,8 +24,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   autoIndex: true, // make this also tru
 });
 
-app.post('/signin', celebrate(credentialsConfig), login);
 app.post('/signup', celebrate(credentialsConfig), createUser);
+app.post('/signin', celebrate(credentialsConfig), login);
 app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));

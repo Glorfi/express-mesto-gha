@@ -47,6 +47,7 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
+    .then((user) => User.findById(user._id).select('-password').lean())
     .then((user) => {
       res.status(201).send({ user });
     })
