@@ -7,12 +7,12 @@ const {
   updateUserAvatar,
   getCurrentUser,
 } = require('../controllers/users');
-const { updateUserInfoConfig } = require('../utils/validationConfig');
+const { updateUserInfoConfig, idConfig } = require('../utils/validationConfig');
 
 router.get('/', getUsers);
 router.get('/me', getCurrentUser);
 router.patch('/me', celebrate(updateUserInfoConfig), updateUserInfo);
 router.patch('/me/avatar', updateUserAvatar);
-router.get('/:id', getUser);
+router.get('/:id', celebrate(idConfig), getUser);
 
 module.exports = router;

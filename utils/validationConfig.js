@@ -1,4 +1,4 @@
-const { Joi } = require('celebrate');
+const { Joi, Segments } = require('celebrate');
 
 const avatarRegex = /^(https?:\/\/)?(www\.)?[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]*)?#?$/;
 
@@ -19,4 +19,10 @@ const updateUserInfoConfig = {
   }),
 };
 
-module.exports = { credentialsConfig, updateUserInfoConfig };
+const idConfig = {
+  [Segments.PARAMS]: Joi.object().keys({
+    id: Joi.string().min(24).max(24),
+  }),
+};
+
+module.exports = { credentialsConfig, updateUserInfoConfig, idConfig };
