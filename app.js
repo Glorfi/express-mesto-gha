@@ -9,12 +9,7 @@ const app = express();
 
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-const {
-  DuplicatedEmail,
-  NotFound,
-  WrongFormat,
-  NotAuthorized,
-} = require('./utils/errorsConfig');
+const handleErrors = require('./middlewares/handleErrors');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -32,37 +27,6 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use(errors());
-app.use((req, res, next) => {
-  const err = new Error('NotFound');
-  err.status = 404;
-  next(err);
-});
-app.use((err, req, res, next) => {
-  if (err.status === 404) {
-    res.status(404).json({ message: 'Неверный путь' });
-  } else {
-    next(err);
-  }
-  if (err instanceof DuplicatedEmail) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-  if (err instanceof NotFound) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-  if (err instanceof NotAuthorized) {
-    res.status(err.statusCode).json({ message: err.message });
-  }
-  if (err.name === 'CastError') {
-    const e = new WrongFormat('Неверный формат идентификатора');
-    res.status(e.statusCode).json({ message: e.message });
-  }
-  if (err.name === 'ValidationError') {
-    const e = new WrongFormat('Неверный формат передаваемых данных');
-    res.status(e.statusCode).json({ message: e.message });
-  }
-  if (err.status === 500) {
-    res.status(404).json({ message: 'Внутреняя ошибка сервера' });
-  }
-});
+app.use(handleErrors);
 
 app.listen(PORT);
