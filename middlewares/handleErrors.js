@@ -5,12 +5,7 @@ const {
   NotAuthorized,
 } = require('../utils/errorsConfig');
 
-module.exports = (err, req, res, next) => {
-  if (err.status === 404) {
-    res.status(404).json({ message: 'Неверный путь' });
-  } else {
-    next(err);
-  }
+module.exports = (err, req, res) => {
   if (err instanceof DuplicatedEmail) {
     res.status(err.statusCode).json({ message: err.message });
   }
@@ -29,6 +24,6 @@ module.exports = (err, req, res, next) => {
     res.status(e.statusCode).json({ message: e.message });
   }
   if (err.status === 500) {
-    res.status(404).json({ message: 'Внутреняя ошибка сервера' });
+    res.status(500).json({ message: 'Внутреняя ошибка сервера' });
   }
 };

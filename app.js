@@ -27,6 +27,11 @@ app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
 app.use(errors());
+app.use((req, res, next) => {
+  const err = new Error('NotFound');
+  err.status = 404;
+  next(err);
+});
 app.use(handleErrors);
 
 app.listen(PORT);
