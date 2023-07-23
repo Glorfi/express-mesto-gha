@@ -6,25 +6,26 @@ module.exports.getCards = (req, res) => {
   });
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => {
       res.send({ card });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res
-          .status(400)
-          .send({ message: 'Введены некоректные данные в теле запроса' });
-      } else {
-        res.status(500).send({ message: err.message });
-      }
-    });
+    .catch(next);
+  // .catch((err) => {
+  //   if (err.name === 'ValidationError') {
+  //     res
+  //       .status(400)
+  //       .send({ message: 'Введены некоректные данные в теле запроса' });
+  //   } else {
+  //     res.status(500).send({ message: err.message });
+  //   }
+  // });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
   Card.findById(req.params.id)
     .then((card) => {
@@ -37,17 +38,18 @@ module.exports.deleteCard = (req, res) => {
       return Card.findByIdAndDelete(req.params.id);
     })
     .then((deletedCard) => res.send(deletedCard))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(400)
-          .send({ message: 'Неверный формат идентификатора карточки' });
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch(next);
+  // .catch((err) => {
+  //   if (err.name === 'CastError') {
+  //     return res
+  //       .status(400)
+  //       .send({ message: 'Неверный формат идентификатора карточки' });
+  //   }
+  //   return res.status(500).send({ message: err.message });
+  // });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $addToSet: { likes: req.user._id } },
@@ -60,18 +62,19 @@ module.exports.likeCard = (req, res) => {
         res.send(card);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Неверный формат идентификатора карточки' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
+  // .catch((err) => {
+  //   if (err.name === 'CastError') {
+  //     res
+  //       .status(400)
+  //       .send({ message: 'Неверный формат идентификатора карточки' });
+  //   } else {
+  //     res.status(500).send({ message: 'На сервере произошла ошибка' });
+  //   }
+  // });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.id,
     { $pull: { likes: req.user._id } },
@@ -84,15 +87,16 @@ module.exports.dislikeCard = (req, res) => {
         res.send(card);
       }
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res
-          .status(400)
-          .send({ message: 'Неверный формат идентификатора карточки' });
-      } else {
-        res.status(500).send({ message: 'На сервере произошла ошибка' });
-      }
-    });
+    .catch(next);
+  // .catch((err) => {
+  //   if (err.name === 'CastError') {
+  //     res
+  //       .status(400)
+  //       .send({ message: 'Неверный формат идентификатора карточки' });
+  //   } else {
+  //     res.status(500).send({ message: 'На сервере произошла ошибка' });
+  //   }
+  // });
 };
 
 // подумать на будущее как вставлять в card.owner и card.likes объект с данными пользователя,
