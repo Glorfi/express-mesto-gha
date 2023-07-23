@@ -47,9 +47,12 @@ module.exports.createUser = (req, res, next) => {
       email,
       password: hash,
     }))
-    .then((user) => User.findById(user._id).select('-password').lean())
+    // .then((user) => User.findById(user._id).select('-password').lean())
     .then((user) => {
-      res.status(201).send({ user });
+      const userData = {
+        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+      };
+      res.status(201).send(userData);
     })
     .catch((err) => {
       if (err.code === 11000) {
