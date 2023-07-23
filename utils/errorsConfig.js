@@ -1,3 +1,4 @@
+/* eslint-disable max-classes-per-file */
 class DuplicatedEmail extends Error {
   constructor(message) {
     super(message);
@@ -5,7 +6,7 @@ class DuplicatedEmail extends Error {
   }
 }
 
-class UserNotFound extends Error {
+class NotFound extends Error {
   constructor(message) {
     super(message);
     this.statusCode = 404;
@@ -18,4 +19,13 @@ class WrongFormat extends Error {
     this.statusCode = 400;
   }
 }
-module.exports = { DuplicatedEmail, UserNotFound, WrongFormat };
+
+class NotAuthorized extends Error {
+  constructor(message) {
+    super(message);
+    this.statusCode = 403;
+  }
+}
+module.exports = {
+  DuplicatedEmail, NotFound, WrongFormat, NotAuthorized,
+};

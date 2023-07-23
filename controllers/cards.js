@@ -1,4 +1,5 @@
 const Card = require('../models/card');
+const { NotFound, NotAuthorized } = require('../utils/errorsConfig');
 
 module.exports.getCards = (req, res) => {
   Card.find({}).then((cards) => {
@@ -14,15 +15,6 @@ module.exports.createCard = (req, res, next) => {
       res.send({ card });
     })
     .catch(next);
-  // .catch((err) => {
-  //   if (err.name === 'ValidationError') {
-  //     res
-  //       .status(400)
-  //       .send({ message: 'Введены некоректные данные в теле запроса' });
-  //   } else {
-  //     res.status(500).send({ message: err.message });
-  //   }
-  // });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -30,23 +22,15 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.id)
     .then((card) => {
       if (!card) {
-        return Promise.reject(new Error('Карточка не найдена'));
+        return Promise.reject(new NotFound('Карточка не найдена'));
       }
       if (card.owner.toString() !== userId.toString()) {
-        return Promise.reject(new Error('Нет прав на удаление карточки'));
+        return Promise.reject(new NotAuthorized('Нет прав на удаление карточки'));
       }
       return Card.findByIdAndDelete(req.params.id);
     })
     .then((deletedCard) => res.send(deletedCard))
     .catch(next);
-  // .catch((err) => {
-  //   if (err.name === 'CastError') {
-  //     return res
-  //       .status(400)
-  //       .send({ message: 'Неверный формат идентификатора карточки' });
-  //   }
-  //   return res.status(500).send({ message: err.message });
-  // });
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -63,15 +47,6 @@ module.exports.likeCard = (req, res, next) => {
       }
     })
     .catch(next);
-  // .catch((err) => {
-  //   if (err.name === 'CastError') {
-  //     res
-  //       .status(400)
-  //       .send({ message: 'Неверный формат идентификатора карточки' });
-  //   } else {
-  //     res.status(500).send({ message: 'На сервере произошла ошибка' });
-  //   }
-  // });
 };
 
 module.exports.dislikeCard = (req, res, next) => {
@@ -88,18 +63,9 @@ module.exports.dislikeCard = (req, res, next) => {
       }
     })
     .catch(next);
-  // .catch((err) => {
-  //   if (err.name === 'CastError') {
-  //     res
-  //       .status(400)
-  //       .send({ message: 'Неверный формат идентификатора карточки' });
-  //   } else {
-  //     res.status(500).send({ message: 'На сервере произошла ошибка' });
-  //   }
-  // });
 };
 
 // подумать на будущее как вставлять в card.owner и card.likes объект с данными пользователя,
-// как это реализовано в оригинальной апишкеб
+// как это реализовано в оригинальной апишке
 // вероятно надо будет импортировать модель юзера сюда и искать о нем данные,
 // а потом вставлять найденный объект в данные карточки

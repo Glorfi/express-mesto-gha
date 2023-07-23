@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { DuplicatedEmail, UserNotFound } = require('../utils/errorsConfig');
+const { DuplicatedEmail, NotFound } = require('../utils/errorsConfig');
 
 module.exports.getUsers = (req, res) => {
   User.find({}).then((users) => {
@@ -14,7 +14,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UserNotFound('Пользователь не найден'));
+        return Promise.reject(new NotFound('Пользователь не найден'));
       }
       res.send(user);
     })
@@ -27,7 +27,7 @@ module.exports.getUser = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        return Promise.reject(new UserNotFound('Пользователь не найден'));
+        return Promise.reject(new NotFound('Пользователь не найден'));
       }
       res.send(user);
     })
