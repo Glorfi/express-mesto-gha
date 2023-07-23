@@ -10,6 +10,7 @@ const app = express();
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const handleErrors = require('./middlewares/handleErrors');
+const handleErrors = require('./middlewares/handleErrors');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
