@@ -11,7 +11,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const {
   DuplicatedEmail,
-  UserNotFound,
+  NotFound,
   WrongFormat,
 } = require('./utils/errorsConfig');
 
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
   useUnifiedTopology: true,
   useNewUrlParser: true,
-  autoIndex: true, // make this also tru
+  autoIndex: true,
 });
 
 app.post('/signup', celebrate(credentialsConfig), createUser);
@@ -45,7 +45,7 @@ app.use((err, req, res, next) => {
   if (err instanceof DuplicatedEmail) {
     res.status(err.statusCode).json({ message: err.message });
   }
-  if (err instanceof UserNotFound) {
+  if (err instanceof NotFound) {
     res.status(err.statusCode).json({ message: err.message });
   }
   if (err.name === 'CastError') {
