@@ -25,4 +25,12 @@ const idConfig = {
   }),
 };
 
-module.exports = { credentialsConfig, updateUserInfoConfig, idConfig };
+const updateAvatarConfig = {
+  body: Joi.object().keys({
+    avatar: Joi.string().regex(avatarRegex),
+  }),
+};
+
+module.exports = {
+  credentialsConfig, updateUserInfoConfig, idConfig, updateAvatarConfig,
+};
