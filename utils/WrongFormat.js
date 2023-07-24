@@ -1,7 +1,7 @@
 class WrongFormat extends Error {
   constructor(message) {
     super(message);
-    this.statusCode = 456;
+    this.statusCode = 400;
   }
 }
 
