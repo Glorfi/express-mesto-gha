@@ -21,7 +21,7 @@ const updateUserInfoConfig = {
 
 const idConfig = {
   [Segments.PARAMS]: Joi.object().keys({
-    id: Joi.string().min(24).max(24),
+    id: Joi.string().length(24).hex().required(),
   }),
 };
 

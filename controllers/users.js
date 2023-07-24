@@ -1,12 +1,17 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
-const { DuplicatedEmail, NotFound } = require('../utils/errorsConfig');
+const DuplicatedEmail = require('../utils/DuplicatedEmail');
+const NotFound = require('../utils/NotFound');
+const WrongFormat = require('../utils/WrongFormat');
+const AuthorizationRequired = require('../utils/AuthorizationRequired');
 
-module.exports.getUsers = (req, res) => {
-  User.find({}).then((users) => {
-    res.send(users);
-  });
+module.exports.getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => {
+      res.send(users);
+    })
+    .catch(next);
 };
 module.exports.getCurrentUser = (req, res, next) => {
   const { _id } = req.user;
@@ -14,7 +19,7 @@ module.exports.getCurrentUser = (req, res, next) => {
     // eslint-disable-next-line consistent-return
     .then((user) => {
       if (!user) {
-        return Promise.reject(new NotFound('Пользователь не найден'));
+        throw new NotFound('Пользователь не найден');
       }
       res.send(user);
     })
@@ -50,18 +55,25 @@ module.exports.createUser = (req, res, next) => {
     // .then((user) => User.findById(user._id).select('-password').lean())
     .then((user) => {
       const userData = {
-        name: user.name, about: user.about, avatar: user.avatar, email: user.email,
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
       };
       res.status(201).send(userData);
     })
     .catch((err) => {
+      if (err.name === 'ValidationError') {
+        const e = new WrongFormat('Неверный формат передаваемых данных');
+        next(e);
+      }
       if (err.code === 11000) {
         const duplicateEmailError = new DuplicatedEmail(
           'Пользователь с данным email уже существует',
         );
         next(duplicateEmailError);
       } else {
-        next();
+        next(err);
       }
     });
 };
@@ -80,7 +92,12 @@ module.exports.updateUserInfo = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        const e = new WrongFormat('Неверный формат передаваемых данных');
+        next(e);
+      } else next(err);
+    });
 };
 
 module.exports.updateUserAvatar = (req, res, next) => {
@@ -97,20 +114,25 @@ module.exports.updateUserAvatar = (req, res, next) => {
     .then((user) => {
       res.send(user);
     })
-    .catch(next);
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        const e = new WrongFormat('Неверный формат передаваемых данных');
+        next(e);
+      } else next(err);
+    });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email })
     .select('+password')
     .then((user) => {
       if (!user) {
-        return Promise.reject(new Error('Неправильные почта или пароль'));
+        throw (new AuthorizationRequired('Неправильные почта или пароль'));
       }
       return bcrypt.compare(password, user.password).then((matched) => {
         if (!matched) {
-          return Promise.reject(new Error('Неправильные почта или пароль'));
+          throw (new AuthorizationRequired('Неправильные почта или пароль'));
         }
         return user;
       });
@@ -121,7 +143,5 @@ module.exports.login = (req, res) => {
       });
       res.send({ token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch(next);
 };

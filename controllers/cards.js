@@ -1,10 +1,12 @@
 const Card = require('../models/card');
-const { NotFound, NotAuthorized } = require('../utils/errorsConfig');
+const NotFound = require('../utils/NotFound');
+const NotAuthorized = require('../utils/NotAuthorized');
+const WrongFormat = require('../utils/WrongFormat');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({}).then((cards) => {
     res.send(cards);
-  });
+  }).catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -14,7 +16,16 @@ module.exports.createCard = (req, res, next) => {
     .then((card) => {
       res.send({ card });
     })
-    .catch(next);
+    .catch((err) => {
+      // eslint-disable-next-line no-console
+      console.log(err);
+      if (err.name === 'ValidationError') {
+        const e = new WrongFormat('Неверный формат передаваемых данных');
+        next(e);
+      } else {
+        next(err);
+      }
+    });
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -22,10 +33,10 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.id)
     .then((card) => {
       if (!card) {
-        return Promise.reject(new NotFound('Карточка не найдена'));
+        throw (new NotFound('Карточка не найдена'));
       }
       if (card.owner.toString() !== userId.toString()) {
-        return Promise.reject(new NotAuthorized('Нет прав на удаление карточки'));
+        throw (new NotAuthorized('Нет прав на удаление карточки'));
       }
       return Card.findByIdAndDelete(req.params.id);
     })
@@ -41,10 +52,9 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
-      } else {
-        res.send(card);
+        throw (new NotFound('Карточка не найдена'));
       }
+      res.send(card);
     })
     .catch(next);
 };
@@ -57,7 +67,7 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        res.status(404).send({ message: 'Карточка не найдена' });
+        throw (new NotFound('Карточка не найдена'));
       } else {
         res.send(card);
       }

@@ -10,6 +10,7 @@ const app = express();
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const handleErrors = require('./middlewares/handleErrors');
+const NotFound = require('./utils/NotFound');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -28,8 +29,7 @@ app.use('/cards', require('./routes/cards'));
 
 app.use(errors());
 app.use((req, res, next) => {
-  const err = new Error('NotFound');
-  err.status = 404;
+  const err = new NotFound('Неверный путь');
   next(err);
 });
 app.use(handleErrors);
